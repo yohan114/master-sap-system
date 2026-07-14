@@ -38,6 +38,10 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
 - [Process Design — Stores, Lubricant & Battery](docs/process-design-stores-lubricant-battery.md) —
   end-to-end transaction workflows, the stock-movement posting engine, status maps, validation &
   exception handling, **screen/form-level designs**, reports and alert logic.
+- [Process Design — Job Card Lifecycle & Costing](docs/process-design-jobcard-and-costing.md) —
+  header/line structure, two-level approval, workshop execution, daily progress, material
+  request/**reservation**, outside repair, labour capture, **cost formulas**, the closure gate, and
+  open/delayed/completed monitoring.
 
 **Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
 dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
