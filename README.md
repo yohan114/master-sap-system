@@ -42,6 +42,10 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
   header/line structure, two-level approval, workshop execution, daily progress, material
   request/**reservation**, outside repair, labour capture, **cost formulas**, the closure gate, and
   open/delayed/completed monitoring.
+- [Implementation & Control Layer](docs/implementation-and-control-layer.md) — migration plan &
+  duplicate-detection, **site-based row-level security**, **dashboards by role** (site-scoped),
+  permission matrix, report catalog, alert/notification framework, roadmap, risk register, MVP vs
+  advanced.
 
 **Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
 dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
