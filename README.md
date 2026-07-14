@@ -46,6 +46,10 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
   duplicate-detection, **site-based row-level security**, **dashboards by role** (site-scoped),
   permission matrix, report catalog, alert/notification framework, roadmap, risk register, MVP vs
   advanced.
+- [Job-Card-Centric Import & Data Model](docs/jobcard-centric-import-and-data-model.md) — the job card
+  as the **primary transaction object**: `job_card_*` linked tables, phased Excel import with
+  parent-child linking, costing roll-up, closure controls, and traceability from every issue/labour/
+  outside-repair event to total job cost.
 
 **Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
 dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
