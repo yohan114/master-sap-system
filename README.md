@@ -31,6 +31,10 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
 | 17 | [Appendices A–E](docs/17-appendices.md) | Menu structure · master hierarchy · numbering · alerts · MVP vs Advanced |
 | 99 | [Traceability Matrix](docs/99-traceability-matrix.md) | Requirements coverage, data-flow traceability, consistency checks, reading order |
 
+**Consolidated reference:** [Master Architecture & Data Model](docs/master-architecture-and-data-model.md)
+— business architecture, module map, master-data hierarchy, full cross-layer schema/table reference,
+status design, numbering, and **data governance rules** in one document.
+
 **Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
 dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
 browser.
