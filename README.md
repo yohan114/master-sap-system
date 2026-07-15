@@ -58,9 +58,11 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
 - [`import-templates/`](import-templates) — ready-to-fill CSV templates for the 7 upload phases
   (see [`import-templates/README.md`](import-templates/README.md)).
 
-**Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
-dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
-browser.
+**Interactive UI prototypes** (self-contained, dark/light; open in any browser):
+- [`prototype/index.html`](prototype/index.html) — the command-center **executive dashboard**.
+- [`prototype/jobcard.html`](prototype/jobcard.html) — **Job Cost Summary + Closure Validation** (the
+  closure gate is interactive — recording approvals live-clears the blocker) and the **Import Error Log**,
+  mirroring the validated `sql/` behaviour.
 
 ## The five modules at a glance
 
