@@ -6,3 +6,4 @@
 \i 03_costing.sql
 \i 04_import_staging.sql
 \i 05_views_functions.sql
+\i 07_loader.sql

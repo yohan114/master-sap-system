@@ -7,8 +7,10 @@
 CREATE TABLE job_card_header (
     job_card_id           bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     jc_no                 varchar(30)  NOT NULL UNIQUE,        -- e.g. JC-WS-26-00514
-    vehicle_id            bigint       NOT NULL REFERENCES vehicle_master(vehicle_id),
-    site_id               bigint       NOT NULL REFERENCES site_master(site_id),
+    -- vehicle_id / site_id are nullable ONLY to allow a controlled stub created by a child-first
+    -- import; ck_jc_stub forces them present for any real (non-stub) job card.
+    vehicle_id            bigint       REFERENCES vehicle_master(vehicle_id),
+    site_id               bigint       REFERENCES site_master(site_id),
     job_type_id           bigint       REFERENCES job_type_master(job_type_id),
     repair_description    varchar(500),
     major_minor           varchar(10)  CHECK (major_minor IN ('MAJOR','MINOR')),
@@ -34,7 +36,8 @@ CREATE TABLE job_card_header (
     created_by bigint NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
     updated_by bigint, updated_at timestamptz,
     is_active boolean NOT NULL DEFAULT true,
-    CONSTRAINT ck_jc_dates CHECK (end_date IS NULL OR start_date IS NULL OR end_date >= start_date)
+    CONSTRAINT ck_jc_dates CHECK (end_date IS NULL OR start_date IS NULL OR end_date >= start_date),
+    CONSTRAINT ck_jc_stub  CHECK (is_stub OR (vehicle_id IS NOT NULL AND site_id IS NOT NULL))
 );
 CREATE INDEX ix_jc_vehicle ON job_card_header(vehicle_id);
 CREATE INDEX ix_jc_site ON job_card_header(site_id);

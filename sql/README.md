@@ -11,7 +11,8 @@ Validated on PostgreSQL 16 (installs clean; the self-test reproduces the worked 
 | `03_costing.sql` | job_card_cost_line (detail) + job_card_cost_summary |
 | `04_import_staging.sql` | import_batch_log, import_error_log, `stg_*` staging (one per phase) |
 | `05_views_functions.sql` | `v_job_card_cost`, `fn_recompute_job_cost`, `fn_effective_price`/`_rate`, closure gate (`fn_job_card_can_close`, `fn_job_card_close_blockers`, `v_job_card_closure_status`) |
-| `install.sql` | includes 01–05 in dependency order |
+| `07_loader.sql` | **import loader**: `stg_*` → live, per-phase validation, `jc_no`→`job_card_id` resolution (parent-first + controlled stubs), reject routing to `import_error_log` (`fn_new_batch`, `fn_load_batch`, `fn_load_phase1..7`) |
+| `install.sql` | includes 01–05 + 07 in dependency order |
 | `06_seed_example.sql` | worked example **and** self-test (job JC-WS-26-00514) |
 
 ## Quick start
@@ -30,6 +31,42 @@ NOTICE:  AFTER  price fix: total=73420.0000 pending=0.0000     variance=-11580.0
 ```
 This demonstrates: cost roll-up from linked cost lines → `73,420`; a **provisional price keeps the job in
 cost-pending and blocks closure**; a Phase-7 price update clears `pending_cost` and the closure gate opens.
+
+## Loading data (per phase)
+
+The loader moves each `stg_*` staging table into the live tables with validation. Flow per file:
+
+```sql
+-- 1. open a batch (auto_stub=false rejects orphan children to the review queue;
+--    auto_stub=true attaches them to a controlled stub job card instead)
+SELECT fn_new_batch(2, 'job_card_mrn_items', false) AS batch_id;   -- phase 2 example
+
+-- 2. \copy the CSV into a temp table, then INSERT into stg_* with (batch_id, source_row_no, cols)
+--    (see ../import-templates and the harness described below)
+
+-- 3. run the loader for that batch
+SELECT fn_load_batch(:batch_id);
+
+-- 4. inspect results
+SELECT * FROM import_batch_log      WHERE batch_id = :batch_id;   -- total/loaded/rejected
+SELECT * FROM import_error_log      WHERE batch_id = :batch_id;   -- rule_code, severity, raw_row
+```
+
+Valid rows land in the live tables (`row_status='LOADED'`, `loaded_id` set); invalid rows go to
+`import_error_log` with a rule code (`V-VEH`, `V-ITEM-UNK`, `V-CHILD-ORPHAN`, `V-LINE-DUP`, …) — the
+batch is **never aborted** by a bad row.
+
+### Loader — validated behaviour (PostgreSQL 16)
+Loading the 7 [`../import-templates`](../import-templates) CSVs plus negative tests produced:
+
+| Case | Result |
+|---|---|
+| Phases 1–7 template rows | all loaded, 0 rejected |
+| Orphan child, `auto_stub=false` | `V-CHILD-ORPHAN` (REVIEW) — not loaded |
+| Orphan child, `auto_stub=true` | controlled **stub** job card created, child attached |
+| Unknown `item_code` | `V-ITEM-UNK` — rejected (no free-text material) |
+| Duplicate line under same job | `V-LINE-DUP` — rejected |
+| Labour with blank rate | resolved via `fn_effective_rate`; unresolved → `V-RATE-MISS` (WARN, loads cost-pending) |
 
 ## Design notes
 - Every child table carries `job_card_id` (FK) — the job card is the hub; costs aggregate via
