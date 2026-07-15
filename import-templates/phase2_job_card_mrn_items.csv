@@ -1,0 +1,4 @@
+jc_no,item_code,qty_requested,uom,qty_issued,source,request_type,line_no
+JC-WS-26-00514,IT-ALT24,1,EA,1,STOCK,INTERNAL,1
+JC-WS-26-00514,IT-BOLT12,4,EA,4,STOCK,INTERNAL,1
+JC-WS-26-00514,IT-BELT,1,EA,1,STOCK,INTERNAL,1

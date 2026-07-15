@@ -1,0 +1,3 @@
+jc_no,vehicle_code,site_code,start_date,repair_description,end_date,major_minor,job_type_code,estimated_cost,remarks,source_ref
+JC-WS-26-00514,CAB-1123,WS,2026-07-10,Alternator + injector pump overhaul,2026-07-12,MAJOR,BRKDN,85000,Breakdown on site,REQ-4471
+JC-WS-26-00515,TRK-0447,WS,2026-07-11,Brake system service,,MINOR,SCHED,42000,,REQ-4480

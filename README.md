@@ -51,6 +51,13 @@ Workshop Job Cards & Costing** — plus legacy Excel/backup migration, on three 
   parent-child linking, costing roll-up, closure controls, and traceability from every issue/labour/
   outside-repair event to total job cost.
 
+**Runnable implementation of the job-card model:**
+- [`sql/`](sql) — PostgreSQL 16 DDL (masters, `job_card_*` transactions, costing, import staging) with a
+  cost roll-up + closure-gate function set, validated on PG16 with a self-test worked example
+  (see [`sql/README.md`](sql/README.md)).
+- [`import-templates/`](import-templates) — ready-to-fill CSV templates for the 7 upload phases
+  (see [`import-templates/README.md`](import-templates/README.md)).
+
 **Interactive UI prototype:** [`prototype/index.html`](prototype/index.html) — a self-contained,
 dark/light command-center dashboard realizing [Doc 12](docs/12-uiux-design-direction.md). Open it in any
 browser.
