@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MMS · Job Card & Costing</title>
+<style>
+  :root{
+    --bg:#eef1f6; --surface:#ffffff; --surface-2:#f6f8fb; --ink:#16203a; --muted:#5b6b85;
+    --border:#e2e8f0; --accent:#1f6feb; --accent-soft:#dbe8ff;
+    --ok:#0e7c5a; --ok-soft:#d8f2e6; --warn:#b26a00; --warn-soft:#fbecd2;
+    --danger:#c0392b; --danger-soft:#fadcd7; --neutral:#5b6b85; --neutral-soft:#e6ebf3;
+    --material:#1f6feb; --general:#7c3aed; --labour:#0e7c5a; --outside:#b26a00;
+    --shadow:0 1px 2px rgba(20,30,55,.06),0 4px 16px rgba(20,30,55,.05);
+    --radius:10px; --mono:ui-monospace,"SF Mono","Cascadia Code","JetBrains Mono",Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#0d1420; --surface:#141d2c; --surface-2:#111a28; --ink:#e6ecf6; --muted:#8595b4;
+      --border:#223049; --accent:#3b82f6; --accent-soft:#16294a; --ok:#22c55e; --ok-soft:#0f2b21;
+      --warn:#f59e0b; --warn-soft:#33270c; --danger:#ef4444; --danger-soft:#331416; --neutral:#8595b4;
+      --neutral-soft:#1b2740; --material:#3b82f6; --general:#a855f7; --labour:#22c55e; --outside:#f59e0b;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.28); }
+  }
+  :root[data-theme="light"]{ --bg:#eef1f6; --surface:#ffffff; --surface-2:#f6f8fb; --ink:#16203a; --muted:#5b6b85;
+    --border:#e2e8f0; --accent:#1f6feb; --accent-soft:#dbe8ff; --ok:#0e7c5a; --ok-soft:#d8f2e6; --warn:#b26a00;
+    --warn-soft:#fbecd2; --danger:#c0392b; --danger-soft:#fadcd7; --neutral:#5b6b85; --neutral-soft:#e6ebf3;
+    --material:#1f6feb; --general:#7c3aed; --labour:#0e7c5a; --outside:#b26a00;
+    --shadow:0 1px 2px rgba(20,30,55,.06),0 4px 16px rgba(20,30,55,.05); }
+  :root[data-theme="dark"]{ --bg:#0d1420; --surface:#141d2c; --surface-2:#111a28; --ink:#e6ecf6; --muted:#8595b4;
+    --border:#223049; --accent:#3b82f6; --accent-soft:#16294a; --ok:#22c55e; --ok-soft:#0f2b21; --warn:#f59e0b;
+    --warn-soft:#33270c; --danger:#ef4444; --danger-soft:#331416; --neutral:#8595b4; --neutral-soft:#1b2740;
+    --material:#3b82f6; --general:#a855f7; --labour:#22c55e; --outside:#f59e0b;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.28); }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+  .side{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;gap:10px;align-items:center;padding:16px 16px 14px;border-bottom:1px solid var(--border)}
+  .brand .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:grid;place-items:center;color:#fff;font-weight:700;font-family:var(--mono);font-size:13px;flex:none}
+  .brand b{font-size:14px} .brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+  nav{padding:8px 8px 20px}
+  .navgroup{color:var(--muted);font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;padding:14px 10px 6px}
+  .navitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:13px;cursor:pointer}
+  .navitem svg{width:16px;height:16px;color:var(--muted);flex:none}
+  .navitem:hover{background:var(--surface-2)} .navitem.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .navitem.active svg{color:var(--accent)} .navitem .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;font-family:var(--mono)}
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+  .tabs{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .tabs button{border:0;background:var(--surface);color:var(--muted);font-size:13px;padding:8px 14px;cursor:pointer;font-family:var(--sans)}
+  .tabs button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .tb-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;color:var(--muted)}
+  .icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0e7c5a,#1f6feb);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;font-family:var(--mono)}
+  .content{padding:20px;display:flex;flex-direction:column;gap:16px}
+  .page-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .page-head h1{font-size:20px;margin:0;letter-spacing:-.2px} .page-head .crumb{color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .page-head .stamp{margin-left:auto;color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+  .kpi .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-family:var(--mono);font-size:23px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
+  .kpi .foot{font-size:12px;color:var(--muted)}
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px} .grid-2b{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-width:0}
+  .card h2{font-size:13px;margin:0 0 2px} .card .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap;font-family:var(--mono)}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .chip.neutral{background:var(--neutral-soft);color:var(--neutral)} .chip.blue{background:var(--accent-soft);color:var(--accent)}
+  .chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.danger{background:var(--danger-soft);color:var(--danger)}
+  .costbar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:4px 0 14px}
+  .costbar > span{display:block} .costbar .m{background:var(--material)} .costbar .g{background:var(--general)} .costbar .l{background:var(--labour)} .costbar .o{background:var(--outside)}
+  table{width:100%;border-collapse:collapse;font-size:13px} th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;padding:8px 6px;border-bottom:1px solid var(--border)}
+  td{padding:9px 6px;border-bottom:1px solid var(--border)} tr:last-child td{border-bottom:0}
+  td.r,th.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle}
+  .tot td{font-weight:700;border-top:2px solid var(--border)}
+  .var{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--ok-soft);color:var(--ok);font-weight:600}
+  .checklist{display:flex;flex-direction:column;gap:2px}
+  .ck{display:flex;align-items:flex-start;gap:11px;padding:10px;border-radius:8px}
+  .ck:hover{background:var(--surface-2)}
+  .ck .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:none;margin-top:1px;font-size:12px;font-weight:800;color:#fff}
+  .ck.pass .ic{background:var(--ok)} .ck.fail .ic{background:var(--danger)}
+  .ck b{font-weight:600} .ck small{display:block;color:var(--muted);font-size:12px}
+  .gate{margin-top:12px;border-radius:10px;padding:14px;border:1px solid var(--border)}
+  .gate.blocked{background:var(--danger-soft)} .gate.open{background:var(--ok-soft)}
+  .gate .row{display:flex;align-items:center;gap:12px}
+  .gate .txt b{font-weight:700} .gate .txt small{display:block;color:var(--muted)}
+  .btn{border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:var(--sans);font-weight:600}
+  .btn:hover{background:var(--surface-2)} .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{filter:brightness(1.06)} .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn[disabled]{opacity:.5;cursor:not-allowed} .gate .btn{margin-left:auto}
+  .banner{display:flex;align-items:center;gap:10px;border-radius:var(--radius);padding:12px 14px;margin-bottom:2px}
+  .banner.warn{background:var(--warn-soft);color:var(--ink)} .banner .b-ico{color:var(--warn)}
+  .summ{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .summ .s{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+  .summ .s .n{font-family:var(--mono);font-size:20px;font-weight:600} .summ .s .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .seg button{border:0;background:var(--surface);color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;font-family:var(--sans)}
+  .seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .hidden{display:none}
+  .rulecode{font-family:var(--mono);font-weight:600;color:var(--accent)}
+  @media (max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-2b{grid-template-columns:1fr}.summ{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:760px){.app{grid-template-columns:1fr}.side{display:none}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mark">MM</div><div><b>Master&nbsp;System</b><small>Command Center</small></div></div>
+    <nav>
+      <div class="navgroup">Overview</div>
+      <a class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+      <div class="navgroup">Operations</div>
+      <a class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7 12 3 4 7v10l8 4 8-4z"/><path d="M4 7l8 4 8-4"/></svg>Stores / Materials</a>
+      <a class="navitem active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 7l-1.5-1.5a3.5 3.5 0 0 0-5 5L3 15v6h6l4.5-4.5a3.5 3.5 0 0 0 5-5L17 10"/></svg>Workshop / Jobs</a>
+      <div class="navgroup">Data</div>
+      <a class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4M4 21h16"/></svg>Imports</a>
+      <a class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Reports</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="tabs">
+        <button id="tab-job" class="on" onclick="showView('job')">Job Cost &amp; Closure</button>
+        <button id="tab-imp" onclick="showView('imp')">Import Error Log</button>
+      </div>
+      <div class="tb-actions">
+        <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+        <div class="avatar" title="R. Fernando · Finance Reviewer">RF</div>
+      </div>
+    </header>
+
+    <!-- ============ VIEW: JOB COST & CLOSURE ============ -->
+    <main class="content" id="view-job">
+      <div class="page-head">
+        <h1>Job Card&nbsp;<span class="num">JC-WS-26-00514</span></h1>
+        <span class="crumb">Workshop / Job Cards / Costing</span>
+        <span class="stamp" id="statusStamp">CAB-1123 · Isuzu FRR · <span id="statusChip" class="chip warn">Cost Pending</span></span>
+      </div>
+
+      <section class="kpis">
+        <div class="kpi"><span class="label">Total Actual Cost</span><span class="val">Rs 73,420</span><span class="foot">rolls up from linked lines</span></div>
+        <div class="kpi"><span class="label">Estimated Cost</span><span class="val">Rs 85,000</span><span class="foot">at approval</span></div>
+        <div class="kpi"><span class="label">Variance</span><span class="val" style="color:var(--ok)">−13.62%</span><span class="foot">Rs −11,580 · under budget</span></div>
+        <div class="kpi"><span class="label">Pending Price</span><span class="val" style="color:var(--ok)">Rs 0</span><span class="foot">all prices resolved</span></div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <h2>Cost Summary</h2>
+          <div class="sub">Assembled from every linked transaction — no manual entry.</div>
+          <div class="costbar">
+            <span class="m" style="width:62.6%"></span><span class="g" style="width:1.0%"></span>
+            <span class="l" style="width:11.0%"></span><span class="o" style="width:25.3%"></span>
+          </div>
+          <table>
+            <thead><tr><th>Cost element</th><th>Source</th><th class="r">Amount (Rs)</th><th class="r">%</th></tr></thead>
+            <tbody>
+              <tr><td><span class="swatch" style="background:var(--material)"></span>Material</td><td>3 MRN lines → issues</td><td class="r">45,990.00</td><td class="r">62.6</td></tr>
+              <tr><td><span class="swatch" style="background:var(--general)"></span>General items</td><td>2 issue lines</td><td class="r">730.00</td><td class="r">1.0</td></tr>
+              <tr><td><span class="swatch" style="background:var(--labour)"></span>Labour</td><td>3 entries · 9.5 h</td><td class="r">8,100.00</td><td class="r">11.0</td></tr>
+              <tr><td><span class="swatch" style="background:var(--outside)"></span>Outside repair</td><td>1 subcontract (priced)</td><td class="r">18,600.00</td><td class="r">25.3</td></tr>
+              <tr class="tot"><td>Total actual</td><td></td><td class="r">73,420.00</td><td class="r">100</td></tr>
+            </tbody>
+          </table>
+          <div class="var"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Rs 11,580 under the 85,000 estimate (−13.62%)</div>
+        </div>
+
+        <div class="card">
+          <h2>Closure Validation</h2>
+          <div class="sub">A job closes only when every gate passes (<span class="num">fn_job_card_can_close</span>).</div>
+          <div class="checklist" id="checklist">
+            <div class="ck pass"><span class="ic">✓</span><div><b>All MRN parts issued</b><small>3 of 3 lines issued or accounted for</small></div></div>
+            <div class="ck pass"><span class="ic">✓</span><div><b>No pending price</b><small>0 provisional cost lines · pending Rs 0</small></div></div>
+            <div class="ck pass"><span class="ic">✓</span><div><b>GRNs priced &amp; posted</b><small>outside-repair invoice priced</small></div></div>
+            <div class="ck pass"><span class="ic">✓</span><div><b>Labour captured</b><small>9.5 h across 3 entries</small></div></div>
+            <div class="ck pass"><span class="ic">✓</span><div><b>Outside repair costed</b><small>Rs 18,600 actual recorded</small></div></div>
+            <div class="ck fail" id="ckApproval"><span class="ic">✕</span><div><b>Approvals complete</b><small id="ckApprovalMsg">Missing TM / OM approval (imported job)</small></div></div>
+          </div>
+          <div class="gate blocked" id="gate">
+            <div class="row">
+              <div class="txt"><b id="gateTitle">Closure blocked</b><small id="gateMsg">1 gate failing: Missing TM/OM approval</small></div>
+              <button class="btn ok" id="approveBtn" onclick="recordApprovals()">Record approvals</button>
+              <button class="btn primary" id="closeBtn" disabled>Close job card</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-2b">
+        <div class="card">
+          <h2>Material &amp; General lines</h2>
+          <table>
+            <thead><tr><th>Item</th><th>Element</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Line (Rs)</th></tr></thead>
+            <tbody>
+              <tr><td>IT-ALT24 · Alternator 24V</td><td><span class="chip blue">Material</span></td><td class="r">1</td><td class="r">42,500</td><td class="r">42,500</td></tr>
+              <tr><td>IT-BOLT12 · Bolt M12</td><td><span class="chip blue">Material</span></td><td class="r">4</td><td class="r">85</td><td class="r">340</td></tr>
+              <tr><td>IT-BELT · Fan belt</td><td><span class="chip blue">Material</span></td><td class="r">1</td><td class="r">3,150</td><td class="r">3,150</td></tr>
+              <tr><td>IT-RAG · Cleaning rags</td><td><span class="chip neutral">General</span></td><td class="r">10</td><td class="r">25</td><td class="r">250</td></tr>
+              <tr><td>IT-SPRAY · Contact spray</td><td><span class="chip neutral">General</span></td><td class="r">1</td><td class="r">480</td><td class="r">480</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>Labour &amp; Outside repair</h2>
+          <table>
+            <thead><tr><th>Detail</th><th>Type</th><th class="r">Hrs/Qty</th><th class="r">Rate</th><th class="r">Line (Rs)</th></tr></thead>
+            <tbody>
+              <tr><td>T. Perera · 2026-07-10</td><td><span class="chip ok">Labour</span></td><td class="r">4.0</td><td class="r">900</td><td class="r">3,600</td></tr>
+              <tr><td>T. Perera · 2026-07-11</td><td><span class="chip ok">Labour</span></td><td class="r">2.5</td><td class="r">900</td><td class="r">2,250</td></tr>
+              <tr><td>A. Silva · 2026-07-11</td><td><span class="chip ok">Labour</span></td><td class="r">3.0</td><td class="r">750</td><td class="r">2,250</td></tr>
+              <tr><td>Injector pump overhaul · Precision Diesel</td><td><span class="chip warn">Outside</span></td><td class="r">1</td><td class="r">—</td><td class="r">18,600</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ VIEW: IMPORT ERROR LOG ============ -->
+    <main class="content hidden" id="view-imp">
+      <div class="page-head">
+        <h1>Import Error Log</h1>
+        <span class="crumb">Data / Imports / Exceptions</span>
+        <span class="stamp">Historical upload · 11 batches</span>
+      </div>
+
+      <div class="banner warn">
+        <svg class="b-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <span>Valid rows loaded; <b>3 rows rejected</b> and <b>1 sent to review</b>. Fix and re-upload — the batch is never aborted by a bad row.</span>
+      </div>
+
+      <section class="summ">
+        <div class="s"><div class="n">16</div><div class="k">Rows loaded</div></div>
+        <div class="s"><div class="n" style="color:var(--danger)">3</div><div class="k">Rejected</div></div>
+        <div class="s"><div class="n" style="color:var(--warn)">1</div><div class="k">In review</div></div>
+        <div class="s"><div class="n" style="color:var(--ok)">1</div><div class="k">Stub created</div></div>
+      </section>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 16px 12px">
+          <h2 style="margin:0">Exceptions</h2>
+          <div class="seg" style="margin-left:auto">
+            <button class="on" onclick="filterErr('ALL',this)">All</button>
+            <button onclick="filterErr('REJECT',this)">Reject</button>
+            <button onclick="filterErr('REVIEW',this)">Review</button>
+            <button onclick="filterErr('WARN',this)">Warn</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="errTable" style="min-width:720px">
+          <thead><tr><th>Batch</th><th>Phase</th><th>Rule</th><th>Severity</th><th>Business key</th><th>Message</th></tr></thead>
+          <tbody>
+            <tr data-sev="REVIEW"><td class="num">8</td><td>2 · MRN</td><td class="rulecode">V-CHILD-ORPHAN</td><td><span class="chip warn">Review</span></td><td class="num">JC-ORPHAN</td><td>No parent job card JC-ORPHAN — queued for review</td></tr>
+            <tr data-sev="REJECT"><td class="num">10</td><td>2 · MRN</td><td class="rulecode">V-ITEM-UNK</td><td><span class="chip danger">Reject</span></td><td class="num">JC-WS-26-00514</td><td>Unknown material code: IT-DOESNOTEXIST (no free-text)</td></tr>
+            <tr data-sev="REJECT"><td class="num">11</td><td>2 · MRN</td><td class="rulecode">V-LINE-DUP</td><td><span class="chip danger">Reject</span></td><td class="num">JC-WS-26-00514</td><td>Duplicate MRN line (job, item, line_no)</td></tr>
+            <tr data-sev="WARN"><td class="num">5</td><td>5 · Labour</td><td class="rulecode">V-RATE-MISS</td><td><span class="chip neutral">Warn</span></td><td class="num">JC-WS-26-00520</td><td>No rate resolved; loaded cost-pending</td></tr>
+            <tr data-sev="REJECT"><td class="num">1</td><td>1 · Header</td><td class="rulecode">V-DATE-ORDER</td><td><span class="chip danger">Reject</span></td><td class="num">JC-WS-26-00522</td><td>end_date before start_date</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>How rejects are handled</h2>
+        <div class="sub">Each rule maps to a fix action — resolve and re-upload only the failed rows.</div>
+        <table>
+          <thead><tr><th>Rule</th><th>Meaning</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td class="rulecode">V-CHILD-ORPHAN</td><td>Child references a job card that doesn't exist</td><td>Upload the Phase-1 header, or enable auto-stub for the batch</td></tr>
+            <tr><td class="rulecode">V-ITEM-UNK</td><td>Material code not in item master</td><td>Add the item to the master, then re-upload</td></tr>
+            <tr><td class="rulecode">V-LINE-DUP</td><td>Same (job, item, line_no) already loaded</td><td>Give the line a distinct line_no or remove the duplicate</td></tr>
+            <tr><td class="rulecode">V-RATE-MISS</td><td>No labour rate resolvable</td><td>Set an effective rate; job stays cost-pending until then</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const root=document.documentElement, tb=document.getElementById('themeBtn'), ti=document.getElementById('themeIco');
+  const sun='<circle cx="12" cy="12" r="4.5"/><path d="M12 1v3M12 20v3M4 12H1M23 12h-3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>';
+  const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>';
+  function dark(){const t=root.getAttribute('data-theme');return t?t==='dark':matchMedia('(prefers-color-scheme:dark)').matches;}
+  function paintTheme(){ti.innerHTML=dark()?sun:moon;}
+  tb.addEventListener('click',()=>{root.setAttribute('data-theme',dark()?'light':'dark');paintTheme();});
+  matchMedia('(prefers-color-scheme:dark)').addEventListener('change',paintTheme); paintTheme();
+
+  function showView(v){
+    document.getElementById('view-job').classList.toggle('hidden', v!=='job');
+    document.getElementById('view-imp').classList.toggle('hidden', v!=='imp');
+    document.getElementById('tab-job').classList.toggle('on', v==='job');
+    document.getElementById('tab-imp').classList.toggle('on', v==='imp');
+  }
+
+  // Interactive closure gate — recording approvals clears the last blocker (mirrors the backend)
+  function recordApprovals(){
+    const ck=document.getElementById('ckApproval');
+    ck.classList.remove('fail'); ck.classList.add('pass');
+    ck.querySelector('.ic').textContent='✓';
+    document.getElementById('ckApprovalMsg').textContent='TM approved 14:02 · OM approved 14:19';
+    const gate=document.getElementById('gate');
+    gate.classList.remove('blocked'); gate.classList.add('open');
+    document.getElementById('gateTitle').textContent='Ready to close';
+    document.getElementById('gateMsg').textContent='All 6 gates pass · can_close = true';
+    document.getElementById('closeBtn').removeAttribute('disabled');
+    document.getElementById('approveBtn').setAttribute('disabled','');
+    const sc=document.getElementById('statusChip'); sc.className='chip ok'; sc.textContent='Ready to Close';
+  }
+
+  function filterErr(sev,btn){
+    btn.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+    document.querySelectorAll('#errTable tbody tr').forEach(tr=>{
+      tr.style.display = (sev==='ALL' || tr.dataset.sev===sev) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

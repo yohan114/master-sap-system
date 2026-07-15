@@ -1,0 +1,4 @@
+jc_no,employee_code,work_date,hours,hourly_rate,task_ref,remarks
+JC-WS-26-00514,T001,2026-07-10,4,900,ALT-REMOVE,
+JC-WS-26-00514,T001,2026-07-11,2.5,900,ALT-REFIT,
+JC-WS-26-00514,T002,2026-07-11,3,750,ASSY,
