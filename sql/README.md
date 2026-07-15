@@ -12,7 +12,8 @@ Validated on PostgreSQL 16 (installs clean; the self-test reproduces the worked 
 | `04_import_staging.sql` | import_batch_log, import_error_log, `stg_*` staging (one per phase) |
 | `05_views_functions.sql` | `v_job_card_cost`, `fn_recompute_job_cost`, `fn_effective_price`/`_rate`, closure gate (`fn_job_card_can_close`, `fn_job_card_close_blockers`, `v_job_card_closure_status`) |
 | `07_loader.sql` | **import loader**: `stg_*` → live, per-phase validation, `jc_no`→`job_card_id` resolution (parent-first + controlled stubs), reject routing to `import_error_log` (`fn_new_batch`, `fn_load_batch`, `fn_load_phase1..7`) |
-| `install.sql` | includes 01–05 + 07 in dependency order |
+| `08_posting.sql` | **posting/costing layer**: derive `job_card_cost_line` from imported/entered rows and recompute the summary (`fn_rebuild_job_costs`, `fn_rebuild_all_job_costs`, `fn_refresh_pending_prices`) |
+| `install.sql` | includes 01–05 + 07 + 08 in dependency order |
 | `06_seed_example.sql` | worked example **and** self-test (job JC-WS-26-00514) |
 
 ## Quick start
@@ -67,6 +68,31 @@ Loading the 7 [`../import-templates`](../import-templates) CSVs plus negative te
 | Unknown `item_code` | `V-ITEM-UNK` — rejected (no free-text material) |
 | Duplicate line under same job | `V-LINE-DUP` — rejected |
 | Labour with blank rate | resolved via `fn_effective_rate`; unresolved → `V-RATE-MISS` (WARN, loads cost-pending) |
+
+## Costing after import (posting layer)
+
+Loading fills the operational tables; **posting** turns them into cost. After a bulk import:
+
+```sql
+SELECT fn_rebuild_all_job_costs();      -- derive cost lines + summary for every real job
+-- ...later, when prices are loaded (phase 7):
+SELECT fn_refresh_pending_prices();     -- re-cost only jobs still carrying provisional lines
+```
+`fn_rebuild_job_costs(job_card_id)` derives MATERIAL (issued MRN lines), GENERAL, LABOUR (hours×rate)
+and OUTSIDE cost lines, resolving each price as of the job's cost date. Any line with no resolvable
+price is flagged `is_provisional` → the job is **cost-pending** and the closure gate stays shut.
+
+### Posting — validated behaviour (PostgreSQL 16)
+End-to-end on the imported example job `JC-WS-26-00514`:
+
+| Stage | material | general | labour | outside | total | pending? | can_close |
+|---|--:|--:|--:|--:|--:|:--:|:--:|
+| After import, before all prices | 45,650 | 0 | 8,100 | 18,600 | 72,350 | **yes** | f (pending price) |
+| After price update + refresh | 45,990 | 730 | 8,100 | 18,600 | **73,420** | no | f (`Missing TM/OM approval`) |
+| After approvals recorded | — | — | — | — | 73,420 | no | **t** |
+
+Variance vs the 85,000 estimate = **−11,580 (−13.62%)**. This is the full chain: import → derive cost
+lines → roll up → provisional until priced → price update refreshes → closure gate enforces approvals.
 
 ## Design notes
 - Every child table carries `job_card_id` (FK) — the job card is the hub; costs aggregate via

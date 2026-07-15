@@ -7,3 +7,4 @@
 \i 04_import_staging.sql
 \i 05_views_functions.sql
 \i 07_loader.sql
+\i 08_posting.sql
